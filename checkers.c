@@ -58,7 +58,6 @@ int game_id;
 
 void DumpBoardForPlayer(int player)
 {
-    fprintf(stderr, "-------------------------------------------- called\n");
     char* filename = malloc(1024);
     sprintf(filename, "dump_%d_player_%d_moves", game_id, player + 1);
     FILE * fp = fopen(filename, "a+");
@@ -84,13 +83,23 @@ void DumpBoardForPlayer(int player)
                    }
                } else board[y][x] = ' ';
            } else board[y][x] = '#';
-           fprintf(fp, "%c", board[y][x]);
            printf("%c",board[y][x]);
        }
        printf("\n");
-       fprintf(fp, "\n");
     }
-    fprintf(fp, "\n");
+
+    // Iterate over the board now and dump the numbers.
+    for (int y = 0; y < 8; y++)
+    {
+        for (int x = 0; x < 8; x++)
+        {
+            if (x%2 != y %2)
+            {
+                char ch = board[y][x];
+
+            }
+        }
+    }
     fclose(fp);
 }
 
@@ -649,6 +658,7 @@ void *timer(void *timeup)
 
 int main(int argc, char *argv[])
 {
+    srand((unsigned int)time(NULL));
     game_id = rand() % 100000;
     char text[1028],temptext[1028], str[1028];
     int tlen,mlen,move[12],numlegal,done;
