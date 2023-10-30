@@ -54,6 +54,47 @@ void Usage(char *str)
    exit(0);
 }
 
+int game_id;
+
+void DumpBoardForPlayer(int player)
+{
+    fprintf(stderr, "-------------------------------------------- called\n");
+    char* filename = malloc(1024);
+    sprintf(filename, "dump_%d_player_%d_moves", game_id, player + 1);
+    FILE * fp = fopen(filename, "a+");
+
+    int board[8][8];
+    int x,y;
+
+    for(y=0; y<8; y++)
+    {
+       for(x=0; x<8; x++)
+       {
+           if(x%2 != y%2) {
+               if(square[y][x].state) {
+                   if(square[y][x].col) 
+                   {
+                      if(square[y][x].state == King) board[y][x] = 'B';
+                      else board[y][x] = 'b';
+                   }
+                   else
+                   {
+                      if(square[y][x].state == King) board[y][x] = 'A';
+                      else board[y][x] = 'a';
+                   }
+               } else board[y][x] = ' ';
+           } else board[y][x] = '#';
+           fprintf(fp, "%c", board[y][x]);
+           printf("%c",board[y][x]);
+       }
+       printf("\n");
+       fprintf(fp, "\n");
+    }
+    fprintf(fp, "\n");
+    fclose(fp);
+}
+
+
 void PrintBoard()
 {
     int board[8][8];
@@ -608,6 +649,7 @@ void *timer(void *timeup)
 
 int main(int argc, char *argv[])
 {
+    game_id = rand() % 100000;
     char text[1028],temptext[1028], str[1028];
     int tlen,mlen,move[12],numlegal,done;
     int numMoves;
@@ -744,6 +786,7 @@ int main(int argc, char *argv[])
                         UpdateBoard();
 #else
                         printf("Move: %s\n",text);
+                        DumpBoardForPlayer(turn);
                         PrintBoard();
 #endif
                         if(turn) turn=0; else turn=1;
@@ -752,6 +795,33 @@ int main(int argc, char *argv[])
                         numlegal = FindLegalMoves(turn+1);
                         if(!numlegal) {
                             sprintf(str,"Player %d has lost the game.",turn+1);
+                            // Also mark their dumpfile with LOSS or WIN.
+                            char* p1dumpfilename = calloc(100, sizeof(char));
+                            char* p2dumpfilename = calloc(100, sizeof(char));
+
+                            sprintf(p1dumpfilename, "dump_%d_player_%d_moves", game_id, 1);
+                            sprintf(p2dumpfilename, "dump_%d_player_%d_moves", game_id, 2);
+                            
+                            FILE *d1, *d2;
+                            d1 = fopen(p1dumpfilename, "a+");
+                            d2 = fopen(p2dumpfilename, "a+");
+
+
+                            if (turn + 1 == 1)
+                            {
+                                // P1 lost the game
+                                fprintf(d1, "0\n");
+                                fprintf(d2, "1\n");
+                            } else 
+                            {
+                                // P2 lost the game
+                                fprintf(d1, "1\n");
+                                fprintf(d2, "0\n");
+                            }
+
+                            fclose(d1);
+                            fclose(d2);
+
                             Message(str);
                             StopGame();
                         }

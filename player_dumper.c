@@ -103,16 +103,6 @@ void FindBestMove(int player, char board[8][8], char *bestmove)
 
     setupBoardState(&state, player, board);
 
-    // Here's an example loop walking through all the moves in the board state
-    for (int i = 0; i < state.numLegalMoves; i++)
-    {
-        State nextState;
-        memcpy(&nextState, &state, sizeof(State));
-        performMove(&nextState, i);
-        printBoard(&nextState);
-        fprintf(stderr, "Eval of board: %f\n", evalBoard(&nextState));
-    }
-
     // For now, until you write your search routine, we will just set the best move
     // to be a random (legal) one, so that it plays a legal game of checkers.
     // You *will* want to replace this with a more intelligent move seleciton
