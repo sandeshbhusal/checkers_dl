@@ -1,3 +1,11 @@
 ./board_data
 ./.nfs*
 ./dump*
+data/*
+*.o
+dumper
+filename
+nn
+computer
+checkers
+

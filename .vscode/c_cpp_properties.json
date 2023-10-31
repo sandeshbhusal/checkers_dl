@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/tiny_dnn",
-                "${workspaceFolder}/cereal"
+                "${workspaceFolder}/cereal",
+                "${workspaceFolder}/*/"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

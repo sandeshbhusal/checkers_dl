@@ -88,6 +88,7 @@ void DumpBoardForPlayer(int player)
        printf("\n");
     }
 
+
     // Iterate over the board now and dump the numbers.
     for (int y = 0; y < 8; y++)
     {
@@ -95,11 +96,41 @@ void DumpBoardForPlayer(int player)
         {
             if (x%2 != y %2)
             {
-                char ch = board[y][x];
-
+                char ch = (char) board[y][x];
+                if (ch == ' ')
+                    fprintf(fp, "0 ");
+                if (ch == 'a')
+                {
+                    if (player+1 == 1)
+                    fprintf(fp, "1 ");
+                    else
+                    fprintf(fp, "-1 ");
+                }
+                if (ch == 'b')
+                {
+                    if (player+1 == 1)
+                    fprintf(fp, "-1 ");
+                    else
+                    fprintf(fp, "1 ");
+                }
+                if (ch == 'A')
+                {
+                    if (player+1 == 1)
+                    fprintf(fp, "2 ");
+                    else
+                    fprintf(fp, "-2 ");
+                }
+                if (ch == 'B')
+                {
+                    if (player+1 == 1)
+                    fprintf(fp, "-2 ");
+                    else
+                    fprintf(fp, "2 ");
+                }
             }
         }
     }
+    fprintf(fp, "\n");
     fclose(fp);
 }
 
@@ -820,6 +851,7 @@ int main(int argc, char *argv[])
                             if (turn + 1 == 1)
                             {
                                 // P1 lost the game
+                                
                                 fprintf(d1, "0\n");
                                 fprintf(d2, "1\n");
                             } else 

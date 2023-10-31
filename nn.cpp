@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <dirent.h>
 #include "tiny_dnn/tiny_dnn.h"
 
 using namespace std;
@@ -10,13 +11,29 @@ using namespace tiny_dnn;
 using namespace tiny_dnn::activation;
 using namespace tiny_dnn::layers;
 
+void enumerateFiles(const std::string& path, vector<string> &list_ptr) {
+    DIR* dir;
+    struct dirent* ent;
+    if ((dir = opendir(path.c_str())) != nullptr) {
+        while ((ent = readdir(dir)) != nullptr) {
+            if (ent->d_type == DT_REG) {
+                string fullpath = path + "/" + ent->d_name;
+                list_ptr.push_back(fullpath);
+            }
+        }
+        closedir(dir);
+    } else {
+        std::cerr << "Could not open directory." << std::endl;
+    }
+}
+
 int main()
 {
     vector<vec_t> boards;
     vector<vec_t> wins;
 
     vector<string> datafiles;
-    datafiles.push_back("dump_42562_player_1_moves");
+    enumerateFiles("./data/", datafiles);
 
     for (auto file : datafiles)
     {
@@ -52,20 +69,15 @@ int main()
         }
     }
 
-    for (size_t i = 0; i < boards.size(); i++)
-    {
-        for (size_t k = 0; k < boards[i].size(); k++)
-            cout << boards[i][k] << ' ';
-        cout << "is: " << wins[i][0] << endl;
-    }
-
     network<sequential> net;
     try
     {
         net.load("testnet");
+        fprintf(stderr, "Found an old testnet. Using it.\n");
     }
     catch (const std::exception &e)
     {
+        fprintf(stderr, "Could not find a testnet. Creating one.\n");
         net << fully_connected_layer(32, 32) << relu()
             << fully_connected_layer(32, 28) << relu()
             << fully_connected_layer(28, 24) << relu()
@@ -82,6 +94,6 @@ int main()
 
     // Let's see if the network can predict the board any better now (should not be able to).
     // You need to provide a vector for prediction, not a single value.
-    fprintf(stderr, "%f", net.predict(boards[0])[0]);
+    fprintf(stderr, "expected: %f, got: %f", wins[0][0], net.predict(boards[0])[0]);
     net.save("testnet");
 }
