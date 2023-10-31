@@ -89,7 +89,7 @@ int main()
     adagrad optimizer;
     int epoch = 0;
     net.fit<mse>(
-        optimizer, boards, wins, 30, 10, []() {}, [&]()
+        optimizer, boards, wins, 100, 50, []() {}, [&]()
         { std::cout << "Finished training epoch: " << epoch++ << std::endl; });
 
     // Let's see if the network can predict the board any better now (should not be able to).
