@@ -30,33 +30,16 @@ float get_board_eval(struct State *state)
     vec_t pred_input;
 
     // All calculations are done in reference to the parent player.
-    int parent_player = state->player % 2 + 1; 
-    for (int y = 0; y < 8; y++){
-        for (int x = 0; x < 8; x++){
-            char ch = state->board[y][x];
-            if (y %2 != x % 2)
+    int parent_player = state->player % 2 + 1;
+    pred_input.push_back(parent_player);
+
+    for (int y = 0; y < 8; y++)
+    {
+        for (int x = 0; x < 8; x++)
+        {
+            if (y % 2 != x % 2)
             {
-                // Empty positions.
-                if (empty(ch))
-                    pred_input.push_back(0);
-
-                // King pieces.
-                if (king(ch))
-                {
-                    if (color(ch) == parent_player)
-                        pred_input.push_back(2);
-                    else
-                        pred_input.push_back(-2);
-                }
-
-                // Normal pieces (pawns).
-                if (piece(ch))
-                {
-                    if (color(ch) == parent_player)
-                        pred_input.push_back(1);
-                    else
-                        pred_input.push_back(-1);
-                }
+                pred_input.push_back(state->board[y][x]);
             }
         }
     }
@@ -79,13 +62,16 @@ void safeCopy(char *dest, char *src, int destSize, int numbytes)
 /* and the PerformMove function */
 void FindBestMove(int player, char board[8][8], char *bestmove)
 {
-    try{
+    try
+    {
         net.load("testnet");
-    } catch (exception e) {
+    }
+    catch (exception e)
+    {
         fprintf(stderr, "There is no testnet to use. MLPPlayer needs a testnet. exiting...");
         exit(-1);
     };
-    
+
     int bestMoveIndex;
     float bestEval = -DBL_MAX;
     struct State state;
@@ -100,7 +86,8 @@ void FindBestMove(int player, char board[8][8], char *bestmove)
         performMove(&nextState, i);
 
         double eval = get_board_eval(&nextState);
-        if (eval > bestEval) {
+        if (eval > bestEval)
+        {
             bestEval = eval;
             bestMoveIndex = i;
         }
@@ -109,7 +96,7 @@ void FindBestMove(int player, char board[8][8], char *bestmove)
     // For now, until you write your search routine, we will just set the best move
     // to be a random (legal) one, so that it plays a legal game of checkers.
     // You *will* want to replace this with a more intelligent move seleciton
-    bestMoveIndex = rand() % state.numLegalMoves;
+    // bestMoveIndex = rand() % state.numLegalMoves;
 
     safeCopy(bestmove, state.movelist[bestMoveIndex], MaxMoveLength, MoveLength(state.movelist[bestMoveIndex]));
 }
