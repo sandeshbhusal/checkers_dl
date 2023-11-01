@@ -3,7 +3,6 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
-#include <dirent.h>
 #include <regex>
 #include "tiny_dnn/tiny_dnn.h"
 
@@ -17,7 +16,7 @@ struct Args
     int batch_size = -1;
     int num_epochs = -1;
     string testnet;
-    string data_dir;
+    string data_file;
 };
 
 
@@ -56,33 +55,19 @@ bool ParseArgs(Args &args, int argc, char **argv)
         args.testnet = arg_map["testnet"];
     }
 
-    if (arg_map.count("data-dir"))
+    if (arg_map.count("data-file"))
     {
-        args.data_dir = arg_map["data-dir"];
+        args.data_file = arg_map["data-file"];
     }
 
     return true;
 }
 
-void enumerateFiles(const std::string &path, vector<string> &list_ptr)
-{
-    DIR *dir;
-    struct dirent *ent;
-    if ((dir = opendir(path.c_str())) != nullptr)
-    {
-        while ((ent = readdir(dir)) != nullptr)
-        {
-            if (ent->d_type == DT_REG)
-            {
-                string fullpath = path + "/" + ent->d_name;
-                list_ptr.push_back(fullpath);
-            }
-        }
-        closedir(dir);
-    }
-    else
-    {
-        std::cerr << "Could not open directory." << std::endl;
+float str_to_float(const std::string &s) {
+    try {
+        return std::stof(s);
+    } catch (...) {
+        return 0.0;
     }
 }
 
@@ -92,53 +77,39 @@ int main(int argc, char** argv)
     // Set sane defaults.
     args.batch_size = 10;
     args.num_epochs = 5;
-    args.data_dir = "./data/";
+    args.data_file = "./data.csv";
     args.testnet = "testnet";
 
     if (!ParseArgs(args, argc, argv))
     {
-        cout << "Usage: " << argv[0] << " --batch-size <number> --num-epochs <number> --testnet <filename> --data-dir <string/path> " << endl;
+        cout << "Usage: " << argv[0] << " --batch-size <number> --num-epochs <number> --testnet <filename> --data-file data file as csv format." << endl;
         return 1;
     }
 
     vector<vec_t> boards;
     vector<vec_t> wins;
 
-    vector<string> datafiles;
-    enumerateFiles(args.data_dir, datafiles);
+    std::ifstream datafile("data.csv");
 
-    for (auto file : datafiles)
+    std::string line;
+    while (std::getline(datafile, line))
     {
-        float_t winner = 0.0;
-        int num_boards = 0;
-
-        ifstream DataFile(file);
-        string line;
-        while (getline(DataFile, line))
+        std::istringstream stream(line);
+        vec_t board;
+        vec_t win;
+        
+        string word;
+        for (int i =0; i < 33; i ++) 
         {
-            if (line.size() == 1)
-            {
-                // set winner here and break out of the loop.
-                winner = static_cast<float_t>(std::stoi(line));
-                break;
-            }
-            else
-            {
-                num_boards += 1;
-                std::istringstream stream(line);
-                string sub;
-                vec_t board;
-                while (stream >> sub)
-                    board.push_back(static_cast<float_t>(std::stoi(sub)));
-
-                boards.push_back(board);
-            }
+            stream >> word;
+            board.push_back(str_to_float(word));
         }
 
-        for (int i = 0; i < num_boards; i++)
-        {
-            wins.push_back({winner});
-        }
+        boards.push_back(board);
+        stream >> word;
+
+        win.push_back(static_cast<float_t>(std::stoi(word)));
+        wins.push_back(win);
     }
 
     network<sequential> net;
@@ -150,8 +121,8 @@ int main(int argc, char** argv)
     catch (const std::exception &e)
     {
         fprintf(stderr, "Could not find a testnet. Creating one.\n");
-        net << fully_connected_layer(32, 32) << sigmoid()
-            << fully_connected_layer(32, 28) << sigmoid()
+        net << fully_connected_layer(33, 33) << sigmoid()
+            << fully_connected_layer(33, 28) << sigmoid()
             << fully_connected_layer(28, 24) << sigmoid()
             << fully_connected_layer(24, 12) << sigmoid()
             << fully_connected_layer(12, 1) << sigmoid();

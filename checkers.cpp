@@ -821,9 +821,9 @@ int main(int argc, char *argv[])
                             FILE *fp = fopen("data.csv", "a+");
                             for (auto board: boards)
                             {
-                                fprintf(fp, "%d,", board[0]);
+                                fprintf(fp, "%d ", board[0]);
                                 for (int i = 1; i < 32; i++)
-                                    fprintf(fp, "%c,", board[i]);
+                                    fprintf(fp, "%c ", board[i]);
 
                                 // Win/loss is the last line in the csv file.
                                 if (board[0] == (turn + 1))
