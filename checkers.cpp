@@ -103,7 +103,10 @@ void DumpBoardForPlayer(int player)
             if (x%2 != y %2)
             {
                 char ch = (char) board[y][x];
-                new_board.push_back(ch);
+                if (ch == ' ')
+                    new_board.push_back('x');
+                else 
+                    new_board.push_back(ch);
             }
         }
     }
@@ -814,7 +817,7 @@ int main(int argc, char *argv[])
                         /* Check to see if other player has now lost */
                         numlegal = FindLegalMoves(turn+1);
                         if(!numlegal) {
-                            sprintf(str,"Player %d has lost the game.",turn+1);
+                            fprintf(stderr,"Player %d has lost the game.",turn+1);
                             // Also mark their dumpfile with LOSS or WIN.
 
                             // Dump the board into a csv file.
