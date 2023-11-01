@@ -1,23 +1,59 @@
 #ifndef COMPUTER_H
 #define COMPUTER_H
 
-#define Empty 0x00
-#define Piece 0x20
-#define King 0x60
-#define Red 0x00
-#define White 0x80
+// #define Empty 0x00
+// #define Piece 0x20
+// #define King 0x60
+// #define Red 0x00
+// #define White 0x80
 
-#define number(x) ((x)&0x1f)
-#define empty(x) ((((x)>>5)&0x03)==0?1:0)
-#define piece(x) ((((x)>>5)&0x03)==1?1:0)
-#define king(x) ((((x)>>5)&0x03)==3?1:0)
+// #define number(x) ((x)&0x1f)
+// #define empty(x) ((((x)>>5)&0x03)==0?1:0)
+// #define piece(x) ((((x)>>5)&0x03)==1?1:0)
+// #define king(x) ((((x)>>5)&0x03)==3?1:0)
 
-// Be careful with this - it returns a 1 or 2, i.e. player number, where 1 corresponds to red and 2 to white
-#define color(x) ((((x)>>7)&1)+1)
+// // Be careful with this - it returns a 1 or 2, i.e. player number, where 1 corresponds to red and 2 to white
+// #define color(x) ((((x)>>7)&1)+1)
 
-#define Clear 0x1f
+// #define Clear 0x1f
 
-#define MaxMoveLength 12
+// #define MaxMoveLength 12
+
+enum {
+    Empty = 0x00,
+    Piece = 0x20,
+    King = 0x60,
+    Red = 0x00,
+    White = 0x80,
+    Clear = 0x1f,
+    MaxMoveLength = 12
+};
+
+static int number(int x); // function declaration
+static int empty(int x); // function declaration
+static int piece(int x); // function declaration
+static int king(int x); // function declaration
+static int color(int x); // function declaration
+
+int number(int x) {
+    return (x & 0x1f);
+}
+
+int empty(int x) {
+    return ((((x) >> 5) & 0x03) == 0) ? 1 : 0;
+}
+
+int piece(int x) {
+    return ((((x) >> 5) & 0x03) == 1) ? 1 : 0;
+}
+
+int king(int x) {
+    return ((((x) >> 5) & 0x03) == 3) ? 1 : 0;
+}
+
+int color(int x) {
+    return ((((x) >> 7) & 1) + 1);
+}
 
 typedef struct State {
     int player;
