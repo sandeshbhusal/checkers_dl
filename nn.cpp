@@ -121,11 +121,11 @@ int main(int argc, char** argv)
     catch (const std::exception &e)
     {
         fprintf(stderr, "Could not find a testnet. Creating one.\n");
-        net << fully_connected_layer(33, 33) << sigmoid()
-            << fully_connected_layer(33, 28) << sigmoid()
-            << fully_connected_layer(28, 24) << sigmoid()
-            << fully_connected_layer(24, 12) << sigmoid()
-            << fully_connected_layer(12, 1) << sigmoid();
+        net << fully_connected_layer(33, 33) << relu()
+            << fully_connected_layer(33, 16) << relu()
+            << fully_connected_layer(16, 12) << relu()
+            << fully_connected_layer(12, 12) << relu()
+            << fully_connected_layer(12, 1) << relu();
     }
 
     // Run the net on the new data.

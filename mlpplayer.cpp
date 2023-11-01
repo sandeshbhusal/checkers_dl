@@ -39,7 +39,10 @@ float get_board_eval(struct State *state)
         {
             if (y % 2 != x % 2)
             {
-                pred_input.push_back(state->board[y][x]);
+                if (state->board[y][x] == ' ')
+                    pred_input.push_back('x');
+                else
+                    pred_input.push_back(state->board[y][x]);
             }
         }
     }

@@ -9,16 +9,15 @@ LDFLAGS         := -L/usr/lib/X11R6 -lXm -lXaw -lXmu -lXt -lX11 -lpthread
 # the checkers server.
 #CFLAGS          += -DGRAPHICS
 
-all: checkers computer nn
+all: checkers computer nn mlpplayer
 checkers: graphics.o
-#computer: myprog.o
 computer: player.c
 	${CC} ${cppflags} ${cflags} player.c playerHelper.c -o computer
 nn: nn.cpp
 	${CC} ${CPPFLAGS} ${CFLAGS} nn.cpp -o trainer -lpthread -I.
-mlpplayer: player_dumper.c
-	${CC} ${cppflags} ${cflags} mlpplayer.c playerHelper.c -o mlpplayer 
+mlpplayer: mlpplayer.cpp
+	${CC} ${cppflags} ${cflags} mlpplayer.cpp playerHelper.c -o mlpplayer -I.
 
 .PHONY: clean
 clean:	
-	@-rm checkers computer *.o trainer
+	@-rm checkers computer *.o trainer mlpplayer
