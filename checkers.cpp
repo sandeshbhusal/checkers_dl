@@ -1,3 +1,4 @@
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -96,12 +97,14 @@ void DumpBoardForPlayer(int player)
     // Iterate over the board now and dump the numbers.
     vector<char> new_board;
     new_board.push_back(player + 1); // Player is either 0 or 1, so we add 1.
+    int total_cells = 0;
     for (int y = 0; y < 8; y++)
     {
         for (int x = 0; x < 8; x++)
         {
             if (x%2 != y %2)
             {
+                total_cells++;
                 char ch = (char) board[y][x];
                 if (ch == ' ')
                     new_board.push_back('x');
@@ -110,7 +113,8 @@ void DumpBoardForPlayer(int player)
             }
         }
     }
-
+    
+    cout << "Total cells: "<< new_board.size() << endl;
     boards.push_back(new_board);
     // One more thing is remaining at this point; need to push the board "win/loss".
     fclose(fp);
@@ -825,7 +829,7 @@ int main(int argc, char *argv[])
                             for (auto board: boards)
                             {
                                 fprintf(fp, "%d ", board[0]);
-                                for (int i = 1; i < 32; i++)
+                                for (int i = 1; i < 33; i++)
                                     fprintf(fp, "%c ", board[i]);
 
                                 // Win/loss is the last line in the csv file.
