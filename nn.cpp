@@ -19,10 +19,10 @@ struct Args
     string data_file;
 };
 
-
-bool starts_with(const string& str, const string& prefix) {
-  regex re{"^" + prefix + ".*"};
-  return regex_match(str, re);
+bool starts_with(const string &str, const string &prefix)
+{
+    regex re{"^" + prefix + ".*"};
+    return regex_match(str, re);
 }
 
 bool ParseArgs(Args &args, int argc, char **argv)
@@ -63,15 +63,19 @@ bool ParseArgs(Args &args, int argc, char **argv)
     return true;
 }
 
-float str_to_float(const std::string &s) {
-    try {
+float str_to_float(const std::string &s)
+{
+    try
+    {
         return std::stof(s);
-    } catch (...) {
+    }
+    catch (...)
+    {
         return 0.0;
     }
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     Args args;
     // Set sane defaults.
@@ -89,7 +93,7 @@ int main(int argc, char** argv)
     vector<vec_t> boards;
     vector<vec_t> wins;
 
-    std::ifstream datafile("data.csv");
+    std::ifstream datafile(args.data_file);
 
     std::string line;
     while (std::getline(datafile, line))
@@ -97,10 +101,10 @@ int main(int argc, char** argv)
         std::istringstream stream(line);
         vec_t board;
         vec_t win;
-        
+
         string word;
         // (player) -- (32 board pieces) upto 33.
-        for (int i = 0; i < 33; i ++) 
+        for (int i = 0; i < 33; i++)
         {
             stream >> word;
             board.push_back(str_to_float(word));
@@ -122,23 +126,30 @@ int main(int argc, char** argv)
     catch (const std::exception &e)
     {
         fprintf(stderr, "Could not find a testnet. Creating one.\n");
-        net << fully_connected_layer(33, 16) << relu()
+        net << fully_connected_layer(33, 28) << relu()
+            << fully_connected_layer(28, 24) << relu()
+            << fully_connected_layer(24, 16) << relu()
             << fully_connected_layer(16, 8) << relu()
             << fully_connected_layer(8, 1);
     }
+
+    cerr << "Got " << boards.size() << " boards and " << wins.size() << " labels for training. " << endl;
 
     // Run the net on the new data.
     adagrad optimizer;
     int epoch = 0;
     net.fit<mse>(
         optimizer, boards, wins, args.batch_size, args.num_epochs, []() {}, [&]()
-        { std::cout << "Finished training epoch: " << epoch++ << std::endl; });
+        { 
+            std::cout << "Finished training epoch: " << epoch++; 
+            auto loss = net.get_loss<mse>(boards, wins); cout << " loss: " << loss << endl;
+        }
+    );
 
     // Let's see if the network can predict the board any better now (should not be able to).
     // You need to provide a vector for prediction, not a single value.
-    fprintf(stderr, "expected: %f, got: %f", wins[0][0], net.predict(boards[0])[0]);
+    fprintf(stderr, "expected: %f, got: %f \n", wins[0][0], net.predict(boards[0])[0]);
     // Alsp calculate and print the loss.
     auto loss = net.get_loss<mse>(boards, wins);
-    cout << "loss: " << loss << endl;
     net.save(args.testnet);
 }

@@ -110,6 +110,7 @@ vec_t generate_input_from_board(int player, struct State *state)
 /* and the PerformMove function */
 void FindBestMove(int player, char board[8][8], char *bestmove)
 {
+    srand(time(NULL));
     net.load("testnet");
 
     int bestMoveIndex;
