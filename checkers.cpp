@@ -11,6 +11,7 @@
 #include <Xm/Xm.h>
 #include <pthread.h>
 
+#include "myprog.h"
 #include "checkers.h"
 #include "graphics.h"
 
@@ -98,6 +99,8 @@ void DumpBoardForPlayer(int player)
     vector<float> new_board;
     new_board.push_back(player + 1); // Player is either 0 or 1, so we add 1.
     int total_cells = 0;
+
+    int turn = player + 1;
     for (int y = 0; y < 8; y++)
     {
         for (int x = 0; x < 8; x++)
@@ -107,9 +110,37 @@ void DumpBoardForPlayer(int player)
                 total_cells++;
                 char ch = (char) board[y][x];
                 if (ch == ' ')
-                    new_board.push_back((float) 'x');
-                else 
-                    new_board.push_back((float) ch);
+                    new_board.push_back(0.0);
+                if (ch == 'a')
+                {
+                    if (turn == 1)
+                        new_board.push_back(1.0);
+                    else
+                        new_board.push_back(-1.0);
+                }
+
+                if (ch == 'b')
+                {
+                    if (turn == 1)
+                        new_board.push_back(-1.0);
+                    else
+                        new_board.push_back(1.0);
+                }
+                if (ch == 'A')
+                {
+                    if (turn == 1)
+                        new_board.push_back(2.0);
+                    else
+                        new_board.push_back(-2.0);
+                }
+
+                if (ch == 'B')
+                {
+                    if (turn == 1)
+                        new_board.push_back(-2.0);
+                    else
+                        new_board.push_back(2.0);
+                }
             }
         }
     }
@@ -835,7 +866,7 @@ int main(int argc, char *argv[])
                                 // Win/loss is the last line in the csv file.
                                 if (board[0] == (turn + 1))
                                 {
-                                    fprintf(fp, "0.0\n");
+                                    fprintf(fp, "-1.0\n");
                                 } else {
                                     fprintf(fp, "1.0\n");
                                 }

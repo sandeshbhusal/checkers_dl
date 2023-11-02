@@ -33,19 +33,54 @@ float get_board_eval(struct State *state)
     int parent_player = state->player % 2 + 1;
     pred_input.push_back(parent_player);
 
+    std::cerr << "Parent player is " << parent_player<< endl;
     for (int y = 0; y < 8; y++)
     {
         for (int x = 0; x < 8; x++)
         {
             if (y % 2 != x % 2)
             {
-                if (state->board[y][x] == ' ')
-                    pred_input.push_back('x');
-                else
-                    pred_input.push_back(state->board[y][x]);
+                char ch = state->board[y][x];
+                if (ch == ' ')
+                    pred_input.push_back(0.0);
+
+                if (ch == 'a')
+                {
+                    if (parent_player == 1)
+                        pred_input.push_back(1.0);
+                    else
+                        pred_input.push_back(-1.0);
+                }
+
+                if (ch == 'b')
+                {
+                    if (parent_player == 1)
+                        pred_input.push_back(-1.0);
+                    else
+                        pred_input.push_back(1.0);
+                }
+                if (ch == 'A')
+                {
+                    if (parent_player == 1)
+                        pred_input.push_back(2.0);
+                    else
+                        pred_input.push_back(-2.0);
+                }
+
+                if (ch == 'B')
+                {
+                    if (parent_player == 1)
+                        pred_input.push_back(-2.0);
+                    else
+                        pred_input.push_back(2.0);
+                }
             }
         }
     }
+
+    for (auto t: pred_input)
+        std::cerr << t << ' ';
+    std::cerr << endl;
 
     rval = net.predict(pred_input)[0];
     return rval;

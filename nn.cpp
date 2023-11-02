@@ -99,7 +99,8 @@ int main(int argc, char** argv)
         vec_t win;
         
         string word;
-        for (int i =0; i < 33; i ++) 
+        // (player) -- (32 board pieces) upto 33.
+        for (int i = 0; i < 33; i ++) 
         {
             stream >> word;
             board.push_back(str_to_float(word));
@@ -121,11 +122,9 @@ int main(int argc, char** argv)
     catch (const std::exception &e)
     {
         fprintf(stderr, "Could not find a testnet. Creating one.\n");
-        net << fully_connected_layer(33, 33) << relu()
-            << fully_connected_layer(33, 16) << relu()
-            << fully_connected_layer(16, 12) << relu()
-            << fully_connected_layer(12, 12) << relu()
-            << fully_connected_layer(12, 1) << relu();
+        net << fully_connected_layer(33, 16) << relu()
+            << fully_connected_layer(16, 8) << relu()
+            << fully_connected_layer(8, 1);
     }
 
     // Run the net on the new data.
