@@ -52,7 +52,7 @@ int hlen = 0;
 int hmove[12];
 int HumanMoved = 0;
 
-vector<vector<char>> boards;
+vector<vector<float>> boards;
 
 void Usage(char *str)
 {
@@ -95,7 +95,7 @@ void DumpBoardForPlayer(int player)
 
 
     // Iterate over the board now and dump the numbers.
-    vector<char> new_board;
+    vector<float> new_board;
     new_board.push_back(player + 1); // Player is either 0 or 1, so we add 1.
     int total_cells = 0;
     for (int y = 0; y < 8; y++)
@@ -107,9 +107,9 @@ void DumpBoardForPlayer(int player)
                 total_cells++;
                 char ch = (char) board[y][x];
                 if (ch == ' ')
-                    new_board.push_back('x');
+                    new_board.push_back((float) 'x');
                 else 
-                    new_board.push_back(ch);
+                    new_board.push_back((float) ch);
             }
         }
     }
@@ -828,16 +828,16 @@ int main(int argc, char *argv[])
                             FILE *fp = fopen("data.csv", "a+");
                             for (auto board: boards)
                             {
-                                fprintf(fp, "%d ", board[0]);
+                                fprintf(fp, "%f ", board[0]);
                                 for (int i = 1; i < 33; i++)
-                                    fprintf(fp, "%c ", board[i]);
+                                    fprintf(fp, "%f ", board[i]);
 
                                 // Win/loss is the last line in the csv file.
                                 if (board[0] == (turn + 1))
                                 {
-                                    fprintf(fp, "0\n");
+                                    fprintf(fp, "0.0\n");
                                 } else {
-                                    fprintf(fp, "1\n");
+                                    fprintf(fp, "1.0\n");
                                 }
                             }
 
