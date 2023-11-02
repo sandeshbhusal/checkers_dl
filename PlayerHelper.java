@@ -258,7 +258,7 @@ public class PlayerHelper {
     }
 
     /* Determines all of the legal moves possible for a given state */
-    static int FindLegalMoves(State state) {
+    static int FindLegalMoves(BoardState state) {
         int x, y;
         char move[] = new char[MaxMoveLength], board[][] = new char[8][8];
 
