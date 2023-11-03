@@ -1,0 +1,6 @@
+#!/bin/bash
+while true
+do
+    # Run the checkers game forever!
+    ./selflearncheckers ai ai 1
+done

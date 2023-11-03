@@ -125,13 +125,27 @@ int main(int argc, char **argv)
     catch (const std::exception &e)
     {
         fprintf(stderr, "Could not find a testnet. Creating one.\n");
-        net << convolutional_layer(8, 4, 3, 1, 20, // C1, 1@8x4 in, 20@6x2 out
-                                   padding::valid, true, 1, 1)
-            << tanh_layer(6, 2, 20)
-            << average_pooling_layer(6, 2, 20, 2) // S2, 20@6x2-in, 20@3x1-out
-            << fully_connected_layer(60, 32) << tanh_layer(8, 4, 1)
-            << fully_connected_layer(32, 8) << tanh_layer(4, 2, 1)
-            << fully_connected_layer(8, 1) << tanh_layer(1, 1, 1);
+        core::backend_t backend_type = core::default_engine();
+
+        net << fully_connected_layer(32, 32*32) << relu()
+            << convolutional_layer(32, 32, 5, 1,
+                                   6)
+            << tanh_layer(28, 28, 6)
+            << average_pooling_layer(28, 28, 6,
+                                     2) // S2, 6@28x28-in, 6@14x14-out
+            << tanh_layer(14, 14, 6)
+            << convolutional_layer(14, 14, 5, 6,
+                                   16)
+            << tanh_layer(10, 10, 16)
+            << average_pooling_layer(10, 10, 16,
+                                     2) // S4, 16@10x10-in, 16@5x5-out
+            << tanh_layer(5, 5, 16)
+            << convolutional_layer(5, 5, 5, 16,
+                                   120)
+            << tanh_layer(1, 1, 120)
+            << fully_connected_layer(120, 2, true, // F6, 120-in, 10-out
+                                     backend_type)
+            << fully_connected_layer(2, 1);
     }
 
     cerr << "Got " << boards.size() << " boards and " << wins.size() << " labels for training. " << endl;
@@ -146,8 +160,5 @@ int main(int argc, char **argv)
             std::cout << "Finished training epoch: " << epoch++; 
             auto loss = net.get_loss<mse>(boards, wins); cout << " loss: " << loss << endl; });
 
-    // Let's see if the network can predict the board any better now (should not be able to).
-    // You need to provide a vector for prediction, not a single value.
-    fprintf(stderr, "expected: %f, got: %f \n", wins[0][0], net.predict(boards[0])[0]);
     net.save(args.testnet);
 }
