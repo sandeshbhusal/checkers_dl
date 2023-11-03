@@ -26,7 +26,7 @@ using namespace std;
 
 struct Square square[16][16];
 float SecPerMove;
-int turn,playing=0;
+int turn, playing = 0;
 int player[2];
 int MaxDepth;
 
@@ -34,10 +34,10 @@ int player1Java;
 int player2Java;
 
 /* Made these global (used to be declared in NewGame) */
-char player1[128],player2[128];
+char player1[128], player2[128];
 
 /*** For the pipes ***/
-int readfd[2],writefd[2];
+int readfd[2], writefd[2];
 pid_t pid[2];
 
 /*** For the jump list ***/
@@ -57,43 +57,52 @@ vector<vector<float>> boards;
 
 void Usage(char *str)
 {
-   printf("Usage: %s player1 player2 SecPerMove [-MaxDepth x]\n",str);
-   exit(0);
+    printf("Usage: %s player1 player2 SecPerMove [-MaxDepth x]\n", str);
+    exit(0);
 }
 
 int game_id;
 
 void DumpBoardForPlayer(int player)
 {
-    const char* filename = "data.csv";
-    FILE * fp = fopen(filename, "a+");
+    const char *filename = "data.csv";
+    FILE *fp = fopen(filename, "a+");
 
     int board[8][8];
-    int x,y;
+    int x, y;
 
-    for(y=0; y<8; y++)
+    for (y = 0; y < 8; y++)
     {
-       for(x=0; x<8; x++)
-       {
-           if(x%2 != y%2) {
-               if(square[y][x].state) {
-                   if(square[y][x].col) 
-                   {
-                      if(square[y][x].state == King) board[y][x] = 'B';
-                      else board[y][x] = 'b';
-                   }
-                   else
-                   {
-                      if(square[y][x].state == King) board[y][x] = 'A';
-                      else board[y][x] = 'a';
-                   }
-               } else board[y][x] = ' ';
-           } else board[y][x] = '#';
-           printf("%c",board[y][x]);
-       }
-       printf("\n");
+        for (x = 0; x < 8; x++)
+        {
+            if (x % 2 != y % 2)
+            {
+                if (square[y][x].state)
+                {
+                    if (square[y][x].col)
+                    {
+                        if (square[y][x].state == King)
+                            board[y][x] = 'B';
+                        else
+                            board[y][x] = 'b';
+                    }
+                    else
+                    {
+                        if (square[y][x].state == King)
+                            board[y][x] = 'A';
+                        else
+                            board[y][x] = 'a';
+                    }
+                }
+                else
+                    board[y][x] = ' ';
+            }
+            else
+                board[y][x] = '#';
+            printf("%c", board[y][x]);
+        }
+        printf("\n");
     }
-
 
     // Iterate over the board now and dump the numbers.
     vector<float> new_board;
@@ -105,10 +114,10 @@ void DumpBoardForPlayer(int player)
     {
         for (int x = 0; x < 8; x++)
         {
-            if (x%2 != y %2)
+            if (x % 2 != y % 2)
             {
                 total_cells++;
-                char ch = (char) board[y][x];
+                char ch = (char)board[y][x];
                 if (ch == ' ')
                     new_board.push_back(0.0);
                 if (ch == 'a')
@@ -144,40 +153,49 @@ void DumpBoardForPlayer(int player)
             }
         }
     }
-    
-    cout << "Total cells: "<< new_board.size() << endl;
+
+    cout << "Total cells: " << new_board.size() << endl;
     boards.push_back(new_board);
     // One more thing is remaining at this point; need to push the board "win/loss".
     fclose(fp);
 }
 
-
 void PrintBoard()
 {
     int board[8][8];
-    int x,y;
+    int x, y;
 
-    for(y=0; y<8; y++)
+    for (y = 0; y < 8; y++)
     {
-       for(x=0; x<8; x++)
-       {
-           if(x%2 != y%2) {
-               if(square[y][x].state) {
-                   if(square[y][x].col) 
-                   {
-                      if(square[y][x].state == King) board[y][x] = 'B';
-                      else board[y][x] = 'b';
-                   }
-                   else
-                   {
-                      if(square[y][x].state == King) board[y][x] = 'A';
-                      else board[y][x] = 'a';
-                   }
-               } else board[y][x] = ' ';
-           } else board[y][x] = '#';
-           printf("%c",board[y][x]);
-       }
-       printf("\n");
+        for (x = 0; x < 8; x++)
+        {
+            if (x % 2 != y % 2)
+            {
+                if (square[y][x].state)
+                {
+                    if (square[y][x].col)
+                    {
+                        if (square[y][x].state == King)
+                            board[y][x] = 'B';
+                        else
+                            board[y][x] = 'b';
+                    }
+                    else
+                    {
+                        if (square[y][x].state == King)
+                            board[y][x] = 'A';
+                        else
+                            board[y][x] = 'a';
+                    }
+                }
+                else
+                    board[y][x] = ' ';
+            }
+            else
+                board[y][x] = '#';
+            printf("%c", board[y][x]);
+        }
+        printf("\n");
     }
 }
 
@@ -185,17 +203,23 @@ void PrintBoard()
 /* simple array format where 0 = empty, 1 = red piece, 2 = white piece */
 void SquaresToBoard(int board[8][8])
 {
-    int x,y;
+    int x, y;
 
-    for(y=0; y<8; y++)
-    for(x=0; x<8; x++)
-    {
-        if(x%2 != y%2) {
-            if(square[y][x].state) {
-                board[y][x] = square[y][x].col+1;
-            } else board[y][x] = 0;
-        } else board[y][x] = 0;
-    }
+    for (y = 0; y < 8; y++)
+        for (x = 0; x < 8; x++)
+        {
+            if (x % 2 != y % 2)
+            {
+                if (square[y][x].state)
+                {
+                    board[y][x] = square[y][x].col + 1;
+                }
+                else
+                    board[y][x] = 0;
+            }
+            else
+                board[y][x] = 0;
+        }
 }
 
 /* Adds a move to the legal moves list */
@@ -203,47 +227,57 @@ void AddMove(int move[12])
 {
     int i;
 
-    for(i=0; i<12; i++) movelist[moveptr][i] = move[i];
+    for (i = 0; i < 12; i++)
+        movelist[moveptr][i] = move[i];
     moveptr++;
 }
 
-/* Finds legal non-jump moves for the King at position x,y */ 
-void FindKingMoves(int board[8][8], int x, int y) 
+/* Finds legal non-jump moves for the King at position x,y */
+void FindKingMoves(int board[8][8], int x, int y)
 {
-    int i,j,x1,y1,move[12];
+    int i, j, x1, y1, move[12];
 
-    memset(move,0,12*sizeof(int));
+    memset(move, 0, 12 * sizeof(int));
     /* Check the four adjacent squares */
-    for(j=-1; j<2; j+=2)
-    for(i=-1; i<2; i+=2)
-    {
-        y1 = y+j; x1 = x+i;
-        /* Make sure we're not off the edge of the board */
-        if(y1<0 || y1>7 || x1<0 || x1>7) continue; 
-        if(!board[y1][x1]) { /* The square is empty, so we can move there */
-            move[0] = square[y][x].val;
-            move[1] = square[y1][x1].val;    
-            AddMove(move);
+    for (j = -1; j < 2; j += 2)
+        for (i = -1; i < 2; i += 2)
+        {
+            y1 = y + j;
+            x1 = x + i;
+            /* Make sure we're not off the edge of the board */
+            if (y1 < 0 || y1 > 7 || x1 < 0 || x1 > 7)
+                continue;
+            if (!board[y1][x1])
+            { /* The square is empty, so we can move there */
+                move[0] = square[y][x].val;
+                move[1] = square[y1][x1].val;
+                AddMove(move);
+            }
         }
-    }
 }
 
 /* Finds legal non-jump moves for the Piece at position x,y */
-void FindMoves(int player, int board[8][8], int x, int y) 
+void FindMoves(int player, int board[8][8], int x, int y)
 {
-    int i,j,x1,y1,move[12];
+    int i, j, x1, y1, move[12];
 
-    memset(move,0,12*sizeof(int));
-    if(player == 1) j = 1; else j = -1;
+    memset(move, 0, 12 * sizeof(int));
+    if (player == 1)
+        j = 1;
+    else
+        j = -1;
     /* Check the two adjacent squares in the forward direction */
-    for(i=-1; i<2; i+=2)
+    for (i = -1; i < 2; i += 2)
     {
-        y1 = y+j; x1 = x+i;
+        y1 = y + j;
+        x1 = x + i;
         /* Make sure we're not off the edge of the board */
-        if(y1<0 || y1>7 || x1<0 || x1>7) continue; 
-        if(!board[y1][x1]) { /* The square is empty, so we can move there */ 
+        if (y1 < 0 || y1 > 7 || x1 < 0 || x1 > 7)
+            continue;
+        if (!board[y1][x1])
+        { /* The square is empty, so we can move there */
             move[0] = square[y][x].val;
-            move[1] = square[y1][x1].val;    
+            move[1] = square[y1][x1].val;
             AddMove(move);
         }
     }
@@ -253,71 +287,85 @@ void FindMoves(int player, int board[8][8], int x, int y)
 void AddJump(int move[12])
 {
     int i;
-    
-    for(i=0; i<12; i++) jumplist[jumpptr][i] = move[i];
+
+    for (i = 0; i < 12; i++)
+        jumplist[jumpptr][i] = move[i];
     jumpptr++;
 }
 
-/* Finds legal jump sequences for the King at position x,y */ 
-int FindKingJump(int player, int board[8][8], int move[12], int len, int x, int y) 
+/* Finds legal jump sequences for the King at position x,y */
+int FindKingJump(int player, int board[8][8], int move[12], int len, int x, int y)
 {
-    int i,j,x1,y1,x2,y2,one,two;
-    int myboard[8][8],mymove[12],FoundJump = 0;
+    int i, j, x1, y1, x2, y2, one, two;
+    int myboard[8][8], mymove[12], FoundJump = 0;
 
-    memcpy(mymove,move,12*sizeof(int));
+    memcpy(mymove, move, 12 * sizeof(int));
     /* Check the four adjacent squares */
-    for(j=-1; j<2; j+=2)
-    for(i=-1; i<2; i+=2)
-    {
-        y1 = y+j; x1 = x+i;
-        y2 = y+2*j; x2 = x+2*i;
-        /* Make sure we're not off the edge of the board */
-        if(y2<0 || y2>7 || x2<0 || x2>7) continue; 
-        one = board[y1][x1];
-        two = board[y2][x2];
-        /* If there's an enemy piece adjacent, and an empty square after him, we can jump */
-        if(one && one != player && !two) {
-            /* Update state of board, and recurse */
-            memcpy(myboard,board,64*sizeof(int));
-            myboard[y][x] = 0;
-            myboard[y1][x1] = 0;
-            mymove[len] = square[y2][x2].val;
-            FoundJump = FindKingJump(player,myboard,mymove,len+1,x+2*i,y+2*j);
-            if(!FoundJump) {
-                FoundJump = 1;
-                AddJump(mymove);
+    for (j = -1; j < 2; j += 2)
+        for (i = -1; i < 2; i += 2)
+        {
+            y1 = y + j;
+            x1 = x + i;
+            y2 = y + 2 * j;
+            x2 = x + 2 * i;
+            /* Make sure we're not off the edge of the board */
+            if (y2 < 0 || y2 > 7 || x2 < 0 || x2 > 7)
+                continue;
+            one = board[y1][x1];
+            two = board[y2][x2];
+            /* If there's an enemy piece adjacent, and an empty square after him, we can jump */
+            if (one && one != player && !two)
+            {
+                /* Update state of board, and recurse */
+                memcpy(myboard, board, 64 * sizeof(int));
+                myboard[y][x] = 0;
+                myboard[y1][x1] = 0;
+                mymove[len] = square[y2][x2].val;
+                FoundJump = FindKingJump(player, myboard, mymove, len + 1, x + 2 * i, y + 2 * j);
+                if (!FoundJump)
+                {
+                    FoundJump = 1;
+                    AddJump(mymove);
+                }
             }
         }
-    }
     return FoundJump;
 }
 
-/* Finds legal jump sequences for the Piece at position x,y */ 
-int FindJump(int player, int board[8][8], int move[12], int len, int x, int y) 
+/* Finds legal jump sequences for the Piece at position x,y */
+int FindJump(int player, int board[8][8], int move[12], int len, int x, int y)
 {
-    int i,j,x1,y1,x2,y2,one,two;
-    int myboard[8][8],mymove[12],FoundJump = 0;
+    int i, j, x1, y1, x2, y2, one, two;
+    int myboard[8][8], mymove[12], FoundJump = 0;
 
-    memcpy(mymove,move,12*sizeof(int));
-    if(player == 1) j = 1; else j = -1;
+    memcpy(mymove, move, 12 * sizeof(int));
+    if (player == 1)
+        j = 1;
+    else
+        j = -1;
     /* Check the two adjacent squares in the forward direction */
-    for(i=-1; i<2; i+=2)
+    for (i = -1; i < 2; i += 2)
     {
-        y1 = y+j; x1 = x+i;
-        y2 = y+2*j; x2 = x+2*i;
+        y1 = y + j;
+        x1 = x + i;
+        y2 = y + 2 * j;
+        x2 = x + 2 * i;
         /* Make sure we're not off the edge of the board */
-        if(y2<0 || y2>7 || x2<0 || x2>7) continue; 
+        if (y2 < 0 || y2 > 7 || x2 < 0 || x2 > 7)
+            continue;
         one = board[y1][x1];
         two = board[y2][x2];
         /* If there's an enemy piece adjacent, and an empty square after him, we can jump */
-        if(one && one != player && !two) { 
+        if (one && one != player && !two)
+        {
             /* Update state of board, and recurse */
-            memcpy(myboard,board,64*sizeof(int));
+            memcpy(myboard, board, 64 * sizeof(int));
             myboard[y][x] = 0;
             myboard[y1][x1] = 0;
             mymove[len] = square[y2][x2].val;
-            FoundJump = FindJump(player,myboard,mymove,len+1,x+2*i,y+2*j);
-            if(!FoundJump) {
+            FoundJump = FindJump(player, myboard, mymove, len + 1, x + 2 * i, y + 2 * j);
+            if (!FoundJump)
+            {
                 FoundJump = 1;
                 AddJump(mymove);
             }
@@ -329,30 +377,35 @@ int FindJump(int player, int board[8][8], int move[12], int len, int x, int y)
 /* Determines all of the legal moves possible for a player given the current board */
 int FindLegalMoves(int player)
 {
-    int x,y,board[8][8],move[12];
+    int x, y, board[8][8], move[12];
 
     SquaresToBoard(board);
-    memset(move,0,12*sizeof(int));
+    memset(move, 0, 12 * sizeof(int));
     jumpptr = moveptr = 0;
 
     /* Loop through board array, calling FindJump, FindMoves, etc. for each piece */
-    for(y=0; y<8; y++)
-    for(x=0; x<8; x++)
-    {
-        if(x%2 != y%2 && board[y][x] == player) {
-            if(square[y][x].state == King) { /* King */
-                move[0] = square[y][x].val;
-                FindKingJump(player,board,move,1,x,y);
-                if(!jumpptr) FindKingMoves(board,x,y);
-            } 
-            else { /* Piece */
-                move[0] = square[y][x].val;
-                FindJump(player,board,move,1,x,y);
-                if(!jumpptr) FindMoves(player,board,x,y);    
+    for (y = 0; y < 8; y++)
+        for (x = 0; x < 8; x++)
+        {
+            if (x % 2 != y % 2 && board[y][x] == player)
+            {
+                if (square[y][x].state == King)
+                { /* King */
+                    move[0] = square[y][x].val;
+                    FindKingJump(player, board, move, 1, x, y);
+                    if (!jumpptr)
+                        FindKingMoves(board, x, y);
+                }
+                else
+                { /* Piece */
+                    move[0] = square[y][x].val;
+                    FindJump(player, board, move, 1, x, y);
+                    if (!jumpptr)
+                        FindMoves(player, board, x, y);
+                }
             }
-        }    
-    }
-    return (jumpptr+moveptr);
+        }
+    return (jumpptr + moveptr);
 }
 
 /* Determines if two moves are identical */
@@ -360,7 +413,9 @@ int Match(int move1[12], int move2[12])
 {
     int i;
 
-    for(i=0; i<12; i++) if(move1[i] != move2[i]) return 0;
+    for (i = 0; i < 12; i++)
+        if (move1[i] != move2[i])
+            return 0;
     return 1;
 }
 
@@ -370,54 +425,69 @@ int IsLegal(int move[12], int mlen)
     int i;
 
     /* Check jumps first, since jumps must always be made */
-    if(jumpptr) {
-        for(i=0; i<jumpptr; i++) if(Match(jumplist[i],move)) return 1;
+    if (jumpptr)
+    {
+        for (i = 0; i < jumpptr; i++)
+            if (Match(jumplist[i], move))
+                return 1;
     }
-    else {
-        for(i=0; i<moveptr; i++) if(Match(movelist[i],move)) return 1;
+    else
+    {
+        for (i = 0; i < moveptr; i++)
+            if (Match(movelist[i], move))
+                return 1;
     }
-    return 0; 
+    return 0;
 }
 
 /* Converts a square's label (number) to its x,y coordinates in the array */
 void NumberToXY(int num, int *x, int *y)
 {
-    int i=0,newy,newx;
+    int i = 0, newy, newx;
 
-    for(newy=0; newy<8; newy++)
-    for(newx=0; newx<8; newx++)
-    {
-        if(newx%2 != newy%2) {
-            i++;
-            if(i==num) {
-                *x = newx;
-                *y = newy;
-                return;
+    for (newy = 0; newy < 8; newy++)
+        for (newx = 0; newx < 8; newx++)
+        {
+            if (newx % 2 != newy % 2)
+            {
+                i++;
+                if (i == num)
+                {
+                    *x = newx;
+                    *y = newy;
+                    return;
+                }
             }
         }
-    }
-    *x = 0; 
+    *x = 0;
     *y = 0;
 }
 
 /* Converts a text version of a move to its integer array version */
 int TextToMove(char *mtext, int move[12])
 {
-    int i=0,len=0,last,val;
+    int i = 0, len = 0, last, val;
     char number[64];
 
-    while (mtext[i] != '\0') {
+    while (mtext[i] != '\0')
+    {
         last = i;
-        while(mtext[i] != '\0' && mtext[i] != '-') i++;
-        strncpy(number,&mtext[last],i-last);
-        number[i-last] = '\0';
+        while (mtext[i] != '\0' && mtext[i] != '-')
+            i++;
+        strncpy(number, &mtext[last], i - last);
+        number[i - last] = '\0';
         val = atoi(number);
-        if(val <= 0 || val > 32) return 0;
+        if (val <= 0 || val > 32)
+            return 0;
         move[len] = val;
         len++;
-        if(mtext[i] != '\0') i++;
+        if (mtext[i] != '\0')
+            i++;
     }
-    if(len<2 || len>12) return 0; else return len;
+    if (len < 2 || len > 12)
+        return 0;
+    else
+        return len;
 }
 
 /* Converts an integer array version of a move to its text version */
@@ -427,11 +497,13 @@ void MoveToText(int move[12], char *mtext)
     char temp[8];
 
     mtext[0] = '\0';
-    for(i=0; i<12; i++) {
-        if(move[i]) {
-            sprintf(temp,"%d",move[i]);
-            strcat(mtext,temp);
-            strcat(mtext,"-");
+    for (i = 0; i < 12; i++)
+    {
+        if (move[i])
+        {
+            sprintf(temp, "%d", move[i]);
+            strcat(mtext, temp);
+            strcat(mtext, "-");
         }
     }
 
@@ -442,26 +514,37 @@ void MoveToText(int move[12], char *mtext)
 /* Performs a move on the board, updating the state of the board */
 void PerformMove(int move[12], int mlen)
 {
-    int i,j,x,y,x1,y1;
+    int i, j, x, y, x1, y1;
 
-    NumberToXY(move[0],&x,&y);
-    NumberToXY(move[mlen-1],&x1,&y1);
+    NumberToXY(move[0], &x, &y);
+    NumberToXY(move[mlen - 1], &x1, &y1);
     square[y1][x1].state = square[y][x].state;
-    if(y1 == 0 || y1 == 7) square[y1][x1].state = King;
+    if (y1 == 0 || y1 == 7)
+        square[y1][x1].state = King;
     square[y1][x1].col = square[y][x].col;
     square[y][x].state = Empty;
-    if(jumpptr) {
-        for(i=0,j=1; j<mlen; i++,j++) {
-            if(move[i] > move[j]) {
-                y1 = -1; 
-                if((move[i]-move[j]) == 9) x1 = -1; else x1 = 1;
+    if (jumpptr)
+    {
+        for (i = 0, j = 1; j < mlen; i++, j++)
+        {
+            if (move[i] > move[j])
+            {
+                y1 = -1;
+                if ((move[i] - move[j]) == 9)
+                    x1 = -1;
+                else
+                    x1 = 1;
             }
-            else {
+            else
+            {
                 y1 = 1;
-                if((move[j]-move[i]) == 7) x1 = -1; else x1 = 1;
+                if ((move[j] - move[i]) == 7)
+                    x1 = -1;
+                else
+                    x1 = 1;
             }
-            NumberToXY(move[i],&x,&y);
-            square[y+y1][x+x1].state = Empty;
+            NumberToXY(move[i], &x, &y);
+            square[y + y1][x + x1].state = Empty;
         }
     }
 }
@@ -471,41 +554,54 @@ int Partial(int move1[12], int move2[12], int len)
 {
     int i;
 
-    for(i=0; i<len; i++) if(move1[i] != move2[i]) return 0;
+    for (i = 0; i < len; i++)
+        if (move1[i] != move2[i])
+            return 0;
     return 1;
 }
 
 /* Checks the human's current move sequence to see if it matches or partially matches */
-/* a valid (legal) move. */ 
+/* a valid (legal) move. */
 int CheckHumanMove(void)
 {
-    int i,full=0,partial=0;
+    int i, full = 0, partial = 0;
 
-    if(jumpptr) {
-        for(i=0; i<jumpptr; i++) {
-            if(Match(jumplist[i],hmove)) full=1; else
-            if(Partial(jumplist[i],hmove,hlen)) partial=1;
+    if (jumpptr)
+    {
+        for (i = 0; i < jumpptr; i++)
+        {
+            if (Match(jumplist[i], hmove))
+                full = 1;
+            else if (Partial(jumplist[i], hmove, hlen))
+                partial = 1;
         }
     }
-    else {
-        for(i=0; i<moveptr; i++) if(Match(movelist[i],hmove)) full = 1;
+    else
+    {
+        for (i = 0; i < moveptr; i++)
+            if (Match(movelist[i], hmove))
+                full = 1;
     }
-    if(full) return FULL; else
-    if(partial) return PARTIAL; else
-    return ILLEGAL;
+    if (full)
+        return FULL;
+    else if (partial)
+        return PARTIAL;
+    else
+        return ILLEGAL;
 }
 
 /* After the human has completed a move, or made an illegal one, unhighlight the */
 /* squares he/she has chosen */
 void UnHighlightAll(void)
 {
-    int x,y;
+    int x, y;
 
-        for(y=0; y<8; y++)
-        for(x=0; x<8; x++)
-        if(x%2 != y%2) {
-        square[y][x].hilite = Green;
-        }
+    for (y = 0; y < 8; y++)
+        for (x = 0; x < 8; x++)
+            if (x % 2 != y % 2)
+            {
+                square[y][x].hilite = Green;
+            }
     UpdateBoard();
 }
 
@@ -514,42 +610,51 @@ void SquareChosen(struct Square *sq)
 {
     int result;
 
-    if(playing && player[turn] == HUMAN) {
-        if(hlen == 0) {    /* This is the first square chosen */
-            if(sq->state && sq->col == turn) {
+    if (playing && player[turn] == HUMAN)
+    {
+        if (hlen == 0)
+        { /* This is the first square chosen */
+            if (sq->state && sq->col == turn)
+            {
                 hmove[hlen] = sq->val;
                 hlen++;
                 sq->hilite = turn;
                 UpdateBoard();
             }
-        } 
-        else {    /* This is NOT the first square chosen */
-            if(!sq->state) {
+        }
+        else
+        { /* This is NOT the first square chosen */
+            if (!sq->state)
+            {
                 /* Add square to move list and check to see if the current move */
                 /* is illegal, partially complete, or a completed legal move */
                 hmove[hlen] = sq->val;
                 hlen++;
                 result = CheckHumanMove();
-                if(result == ILLEGAL) {
+                if (result == ILLEGAL)
+                {
                     hlen = 0;
                     UnHighlightAll();
-                    memset(hmove,0,12*sizeof(int));
+                    memset(hmove, 0, 12 * sizeof(int));
                 }
-                else if(result == PARTIAL) {
+                else if (result == PARTIAL)
+                {
                     sq->hilite = turn;
                     UpdateBoard();
                 }
-                else if(result == FULL) {
+                else if (result == FULL)
+                {
                     UnHighlightAll();
                     HumanMoved = 1;
-                }    
-            } 
-            else {
+                }
+            }
+            else
+            {
                 hlen = 0;
                 UnHighlightAll();
-                memset(hmove,0,12*sizeof(int));
+                memset(hmove, 0, 12 * sizeof(int));
             }
-        }    
+        }
     }
 }
 
@@ -559,69 +664,81 @@ void StopGame(void)
     char command[32];
     int i;
 
-    if(playing) {
-        for(i=0; i<2; i++) {
-            if(player[i] == COMPUTER) {
+    if (playing)
+    {
+        for (i = 0; i < 2; i++)
+        {
+            if (player[i] == COMPUTER)
+            {
                 close(writefd[i]);
                 close(readfd[i]);
-                sprintf(command,"kill -9 %d\n",(int)pid[i]);
+                sprintf(command, "kill -9 %d\n", (int)pid[i]);
                 system(command);
             }
         }
         playing = 0;
     }
 #ifndef GRAPHICS
-exit(0);
+    exit(0);
 #endif
 }
 
 /* Called when the 'New Game' menu item is selected */
 void NewGame(void)
 {
-    char arg1[16],arg2[16], arg01[16], arg02[16];
+    char arg1[16], arg2[16], arg01[16], arg02[16];
     int i;
 #ifdef GRAPHICS
-    if(!NewDialog(player1,player2,&SecPerMove)) return;
-    if(!strcmp(player1,"human")) player[0] = HUMAN; else player[0] = COMPUTER;
-    if(!strcmp(player2,"human")) player[1] = HUMAN; else player[1] = COMPUTER;
+    if (!NewDialog(player1, player2, &SecPerMove))
+        return;
+    if (!strcmp(player1, "human"))
+        player[0] = HUMAN;
+    else
+        player[0] = COMPUTER;
+    if (!strcmp(player2, "human"))
+        player[1] = HUMAN;
+    else
+        player[1] = COMPUTER;
 #else
-   player[0]=COMPUTER;
-   player[1]=COMPUTER;
+    player[0] = COMPUTER;
+    player[1] = COMPUTER;
 #endif
 
-
-    arg01[0]=0;
-    arg02[0]=0;
-    player1Java=0;
-    player2Java=0;
-    if(!strncmp(player1,"java",4)) 
+    arg01[0] = 0;
+    arg02[0] = 0;
+    player1Java = 0;
+    player2Java = 0;
+    if (!strncmp(player1, "java", 4))
     {
-        player1Java=1;
-        fprintf(stderr,"Player1 is java player\n");
-        strcpy(arg01,&(player1[5]));
-        player1[4]=0;
-        strcpy(player1,"/usr/bin/java");
-        fprintf(stderr,"%s %s\n", player1, arg01);
+        player1Java = 1;
+        fprintf(stderr, "Player1 is java player\n");
+        strcpy(arg01, &(player1[5]));
+        player1[4] = 0;
+        strcpy(player1, "/usr/bin/java");
+        fprintf(stderr, "%s %s\n", player1, arg01);
     }
-    if(!strncmp(player2,"java",4)) 
+    if (!strncmp(player2, "java", 4))
     {
-        player2Java=1;
-        fprintf(stderr,"Player2 is java player\n");
-        strcpy(arg02,&(player2[5]));
-        //player2[4]=0;
-        strcpy(player2,"/usr/bin/java");
-        fprintf(stderr,"%s %s\n", player2, arg02);
+        player2Java = 1;
+        fprintf(stderr, "Player2 is java player\n");
+        strcpy(arg02, &(player2[5]));
+        // player2[4]=0;
+        strcpy(player2, "/usr/bin/java");
+        fprintf(stderr, "%s %s\n", player2, arg02);
     }
 
     /* If 'New Game' is chosen while a game is in progress, stop the game */
-    if (playing) StopGame();
+    if (playing)
+        StopGame();
 
     // Set up the pipes necessary for communication with computer players.
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < 2; i++)
+    {
         int to_proc[2];
         int from_proc[2];
 
-        if (player[i] == HUMAN) {
+        if (player[i] == HUMAN)
+        {
             // Pipes aren't needed for human players.
             continue;
         }
@@ -632,13 +749,15 @@ void NewGame(void)
         writefd[i] = to_proc[1];
         readfd[i] = from_proc[0];
 
-        if (fcntl(readfd[i],F_SETFL,(int)O_NDELAY) < 0) {
+        if (fcntl(readfd[i], F_SETFL, (int)O_NDELAY) < 0)
+        {
             printf("fcntl failed\n");
             return;
         }
 
         /* Fork a child process. We will then overlay the computer program */
-        if((pid[i] = fork()) == (pid_t)0) {
+        if ((pid[i] = fork()) == (pid_t)0)
+        {
             int temp;
             dup2(to_proc[0], STDIN_FILENO);
             close(to_proc[0]);
@@ -646,31 +765,31 @@ void NewGame(void)
             dup2(from_proc[1], STDOUT_FILENO);
             close(from_proc[1]);
 
-            sprintf(arg1,"%.2f",SecPerMove);
-            if(MaxDepth >= 0)
+            sprintf(arg1, "%.2f", SecPerMove);
+            if (MaxDepth >= 0)
             {
-               sprintf(arg2,"%d", MaxDepth);
-               if((i==0 && player1Java ) || (i==1 && player2Java))
-                   temp = execl(i?player2:player1,i?player2:player1, i?arg02:arg01,arg1,arg2, NULL);
-               else
-                   temp = execl(i?player2:player1,i?player2:player1, arg1,arg2,(char *)0);
-               if(temp)
-               {
-                   fprintf(stderr, "exec for %s failed\n",i?player2:player1);
-                   exit(0);
-               }
+                sprintf(arg2, "%d", MaxDepth);
+                if ((i == 0 && player1Java) || (i == 1 && player2Java))
+                    temp = execl(i ? player2 : player1, i ? player2 : player1, i ? arg02 : arg01, arg1, arg2, NULL);
+                else
+                    temp = execl(i ? player2 : player1, i ? player2 : player1, arg1, arg2, (char *)0);
+                if (temp)
+                {
+                    fprintf(stderr, "exec for %s failed\n", i ? player2 : player1);
+                    exit(0);
+                }
             }
             else
             {
-               if((i==0 && player1Java ) || (i==1 && player2Java))
-                   temp = execl(i?player2:player1,i?player2:player1, i?arg02:arg01,arg1, NULL);
-               else 
-                   temp = execl(i?player2:player1,i?player2:player1, arg1,(char *)0);
-               if(temp)
-               {
-                   fprintf(stderr, "exec for %s failed\n",i?player2:player1);
-                   exit(0);
-               }
+                if ((i == 0 && player1Java) || (i == 1 && player2Java))
+                    temp = execl(i ? player2 : player1, i ? player2 : player1, i ? arg02 : arg01, arg1, NULL);
+                else
+                    temp = execl(i ? player2 : player1, i ? player2 : player1, arg1, (char *)0);
+                if (temp)
+                {
+                    fprintf(stderr, "exec for %s failed\n", i ? player2 : player1);
+                    exit(0);
+                }
             }
         }
     }
@@ -678,29 +797,28 @@ void NewGame(void)
     playing = 1;
     turn = 0;
     hlen = 0;
-    memset(hmove,0,12*sizeof(int));
-    FindLegalMoves(turn+1);
+    memset(hmove, 0, 12 * sizeof(int));
+    FindLegalMoves(turn + 1);
 
     /* Tell the computer programs which player they are */
-    if(player[0] == COMPUTER) 
+    if (player[0] == COMPUTER)
     {
-       write(writefd[0],"Player1\n",8);
-       fsync(writefd[0]);
+        write(writefd[0], "Player1\n", 8);
+        fsync(writefd[0]);
     }
-    if(player[1] == COMPUTER) 
+    if (player[1] == COMPUTER)
     {
-       write(writefd[1],"Player2\n",8);
-       fsync(writefd[1]);
+        write(writefd[1], "Player2\n", 8);
+        fsync(writefd[1]);
     }
 }
 
-
 void *timer(void *timeup)
 {
-    //usleep(1000 + SecPerMove * 1000);
-    int sleeptime = 1+SecPerMove;
+    // usleep(1000 + SecPerMove * 1000);
+    int sleeptime = 1 + SecPerMove;
     sleep(sleeptime);
-    *((int*)timeup) = 1;
+    *((int *)timeup) = 1;
     pthread_exit(NULL);
 }
 
@@ -708,156 +826,194 @@ int main(int argc, char *argv[])
 {
     srand((unsigned int)time(NULL));
     game_id = rand() % 100000;
-    char text[1028],temptext[1028], str[1028];
-    int tlen,mlen,move[12],numlegal,done;
+    char text[1028], temptext[1028], str[1028];
+    int tlen, mlen, move[12], numlegal, done;
     int numMoves;
-    if(argc>=3)
+    if (argc >= 3)
     {
-       if(!strncasecmp("-MaxDepth",argv[argc-2], strlen("-MaxDepth")))
-       {
-          MaxDepth = atoi(argv[argc-1]);
-          argc-=2;
-       }
-       else MaxDepth = -1;
+        if (!strncasecmp("-MaxDepth", argv[argc - 2], strlen("-MaxDepth")))
+        {
+            MaxDepth = atoi(argv[argc - 1]);
+            argc -= 2;
+        }
+        else
+            MaxDepth = -1;
     }
-    else MaxDepth = -1;
+    else
+        MaxDepth = -1;
 
 #ifndef GRAPHICS
     printf("No graphics\n");
-    if(argc != 4) Usage(argv[0]);
-    strcpy(player1,argv[1]);
-    strcpy(player2,argv[2]);
+    if (argc != 4)
+        Usage(argv[0]);
+    strcpy(player1, argv[1]);
+    strcpy(player2, argv[2]);
     SecPerMove = atof(argv[3]);
 #endif
 
 #ifdef GRAPHICS
     printf("Graphics\n");
-    InitGraphics(argc,argv);
+    InitGraphics(argc, argv);
 #else
-      NewGame();
-      numMoves=0;
-      {
-     int x,y;
-     /* I'll wait a bit to make sure both oponents are ready to go */
-     printf("waiting\n");
-    //  sleep(1);
-     for(x=0;x<1000;x++)
-     for(y=0;y<10000;y++);
-      }
+    NewGame();
+    numMoves = 0;
+    {
+        int x, y;
+        /* I'll wait a bit to make sure both oponents are ready to go */
+        printf("waiting\n");
+        //  sleep(1);
+        for (x = 0; x < 1000; x++)
+            for (y = 0; y < 10000; y++)
+                ;
+    }
 #endif
     ResetBoard();
-    for(;;) {
+    for (;;)
+    {
         pthread_t thread;
         int dummy;
         HandleEvents();
-        if(playing) {
-            sprintf(str,"Waiting for player %d",turn+1);
+        if (playing)
+        {
+            sprintf(str, "Waiting for player %d", turn + 1);
             Message(str);
             HumanMoved = done = 0;
-            pthread_create(&thread, NULL, timer, (void*)&done);
+            pthread_create(&thread, NULL, timer, (void *)&done);
             pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &dummy);
-            do {
+            do
+            {
                 HandleEvents();
                 /* Give humans all the time they want to move */
-                if(player[turn] == HUMAN) done = HumanMoved;
-                else if(player[turn] == COMPUTER) 
+                if (player[turn] == HUMAN)
+                    done = HumanMoved;
+                else if (player[turn] == COMPUTER)
                 {
                     char *ptr;
-                    memset(temptext,0,sizeof(temptext));
-                    tlen = read(readfd[turn],temptext,1028);
-                    if(tlen > 0) 
+                    memset(temptext, 0, sizeof(temptext));
+                    tlen = read(readfd[turn], temptext, 1028);
+                    if (tlen > 0)
                     {
                         numMoves++;
                         ptr = temptext;
-                        while(*ptr == 10 && *ptr !=0) ptr++;
-                        strcpy(text,ptr);
-                        if(strlen(text)) done=1;
+                        while (*ptr == 10 && *ptr != 0)
+                            ptr++;
+                        strcpy(text, ptr);
+                        if (strlen(text))
+                            done = 1;
                     }
                 }
-            } while(playing && !done && numMoves <= 100);
+            } while (playing && !done && numMoves <= 100);
             pthread_cancel(thread);
-            if(!playing) continue;
-            if(numMoves>100)
+            if (!playing)
+                continue;
+            if (numMoves > 100)
             {
-                sprintf(str,"Draw %i.", numMoves);
+                sprintf(str, "Draw %i.", numMoves);
                 Message(str);
+                fprintf(stderr, "Player %d has lost the game.", turn + 1);
+                // Also mark their dumpfile with LOSS or WIN.
+
+                // Dump the board into a csv file.
+                FILE *fp = fopen("data.csv", "a+");
+                for (auto board : boards)
+                {
+                    fprintf(fp, "%f ", board[0]);
+                    for (int i = 1; i < 33; i++)
+                        fprintf(fp, "%f ", board[i]);
+
+                    // Win/loss is the last line in the csv file.
+                    fprintf(fp, "0.0\n"); 
+                }
+
                 StopGame();
                 continue;
             }
-            if(player[turn] == COMPUTER && tlen <= 0) {
-                sprintf(str,"Player %d has lost the game (time limit reached).",turn+1);
+            if (player[turn] == COMPUTER && tlen <= 0)
+            {
+                sprintf(str, "Player %d has lost the game (time limit reached).", turn + 1);
                 Message(str);
                 StopGame();
-            }    
-            else {
-                if(player[turn] == COMPUTER) {
-                    tlen = strlen(text)-1;
-                    memset(move,0,12*sizeof(int));
-                    mlen = TextToMove(text,move);
+            }
+            else
+            {
+                if (player[turn] == COMPUTER)
+                {
+                    tlen = strlen(text) - 1;
+                    memset(move, 0, 12 * sizeof(int));
+                    mlen = TextToMove(text, move);
                 }
-                else if(player[turn] == HUMAN) {
+                else if (player[turn] == HUMAN)
+                {
                     mlen = hlen;
-                    memcpy(move,hmove,12*sizeof(int));
+                    memcpy(move, hmove, 12 * sizeof(int));
                     hlen = 0;
-                    memset(hmove,0,12*sizeof(int));
-                    MoveToText(move,text);
+                    memset(hmove, 0, 12 * sizeof(int));
+                    MoveToText(move, text);
                 }
 
-                if(!mlen) { /* Illegal move check 1 */
+                if (!mlen)
+                { /* Illegal move check 1 */
                     /*char temp[1000];
                     char *ptr1, *ptr2;
                     ptr1=text;
                     temp[0] = 0;
                     ptr2=temp;
-                    while(*ptr1) 
+                    while(*ptr1)
                     {
                         sprintf(ptr2,"%i, ", *ptr1);
                         ptr1++;
                         ptr2 = &(ptr2[strlen(ptr2)]);
                     }*/
-                    //sprintf(str,"Player %d has lost the game (illegal move %s %s submitted).",turn+1,text, temp);
-                    sprintf(str,"Player %d has lost the game (illegal move %s submitted).",turn+1,text);
+                    // sprintf(str,"Player %d has lost the game (illegal move %s %s submitted).",turn+1,text, temp);
+                    sprintf(str, "Player %d has lost the game (illegal move %s submitted).", turn + 1, text);
                     Message(str);
                     StopGame();
                 }
-                else {
-                    if(!IsLegal(move,mlen)) { /* Illegal move check 2 */
-                       /*char temp[1000];
-                       char *ptr1, *ptr2;
-                       ptr1=text;
-                       temp[0] = 0;
-                       ptr2=temp;
-                       while(*ptr1) 
-                       {
-                           sprintf(ptr2,"%i, ", *ptr1);
-                           ptr1++;
-                           ptr2 = &(ptr2[strlen(ptr2)]);
-                       }
-                        sprintf(str,"Player %d has lost the game (illegal move %s %s submitted).",turn+1,text, temp);*/
-                        sprintf(str,"Player %d has lost the game (illegal move %s submitted).",turn+1,text);
+                else
+                {
+                    if (!IsLegal(move, mlen))
+                    {   /* Illegal move check 2 */
+                        /*char temp[1000];
+                        char *ptr1, *ptr2;
+                        ptr1=text;
+                        temp[0] = 0;
+                        ptr2=temp;
+                        while(*ptr1)
+                        {
+                            sprintf(ptr2,"%i, ", *ptr1);
+                            ptr1++;
+                            ptr2 = &(ptr2[strlen(ptr2)]);
+                        }
+                         sprintf(str,"Player %d has lost the game (illegal move %s %s submitted).",turn+1,text, temp);*/
+                        sprintf(str, "Player %d has lost the game (illegal move %s submitted).", turn + 1, text);
                         Message(str);
                         StopGame();
                     }
-                    else {  /* Legal Move */
-                        PerformMove(move,mlen);
+                    else
+                    { /* Legal Move */
+                        PerformMove(move, mlen);
 #ifdef GRAPHICS
                         UpdateBoard();
 #else
-                        printf("Move: %s\n",text);
+                        printf("Move: %s\n", text);
                         DumpBoardForPlayer(turn);
                         PrintBoard();
 #endif
-                        if(turn) turn=0; else turn=1;
-    
+                        if (turn)
+                            turn = 0;
+                        else
+                            turn = 1;
+
                         /* Check to see if other player has now lost */
-                        numlegal = FindLegalMoves(turn+1);
-                        if(!numlegal) {
-                            fprintf(stderr,"Player %d has lost the game.",turn+1);
+                        numlegal = FindLegalMoves(turn + 1);
+                        if (!numlegal)
+                        {
+                            fprintf(stderr, "Player %d has lost the game.", turn + 1);
                             // Also mark their dumpfile with LOSS or WIN.
 
                             // Dump the board into a csv file.
                             FILE *fp = fopen("data.csv", "a+");
-                            for (auto board: boards)
+                            for (auto board : boards)
                             {
                                 fprintf(fp, "%f ", board[0]);
                                 for (int i = 1; i < 33; i++)
@@ -867,22 +1023,26 @@ int main(int argc, char *argv[])
                                 if (board[0] == (turn + 1))
                                 {
                                     fprintf(fp, "-1.0\n");
-                                } else {
+                                }
+                                else
+                                {
                                     fprintf(fp, "1.0\n");
                                 }
                             }
 
                             exit(0);
                         }
-                        else if(player[turn] == COMPUTER) {
-                        #ifndef __APPLE__
-                            if(text[strlen(text)-1] != '\n') strcat(text,"\n");
-                        #endif
-                            write(writefd[turn],text,strlen(text));
+                        else if (player[turn] == COMPUTER)
+                        {
+#ifndef __APPLE__
+                            if (text[strlen(text) - 1] != '\n')
+                                strcat(text, "\n");
+#endif
+                            write(writefd[turn], text, strlen(text));
                         }
                     }
                 }
             }
-        }            
+        }
     }
 }
