@@ -103,8 +103,7 @@ int main(int argc, char **argv)
         vec_t win;
 
         string word;
-        // (player) -- (32 board pieces) upto 33.
-        for (int i = 0; i < 33; i++)
+        for (int i = 0; i < 32; i++)
         {
             stream >> word;
             board.push_back(str_to_float(word));
@@ -126,11 +125,13 @@ int main(int argc, char **argv)
     catch (const std::exception &e)
     {
         fprintf(stderr, "Could not find a testnet. Creating one.\n");
-        net << fully_connected_layer(33, 28) << relu()
-            << fully_connected_layer(28, 24) << relu()
-            << fully_connected_layer(24, 16) << relu()
-            << fully_connected_layer(16, 8) << relu()
-            << fully_connected_layer(8, 1);
+        net << convolutional_layer(8, 4, 3, 1, 20, // C1, 1@8x4 in, 20@6x2 out
+                                   padding::valid, true, 1, 1)
+            << tanh_layer(6, 2, 20)
+            << average_pooling_layer(6, 2, 20, 2) // S2, 20@6x2-in, 20@3x1-out
+            << fully_connected_layer(60, 32) << tanh_layer(8, 4, 1)
+            << fully_connected_layer(32, 8) << tanh_layer(4, 2, 1)
+            << fully_connected_layer(8, 1) << tanh_layer(1, 1, 1);
     }
 
     cerr << "Got " << boards.size() << " boards and " << wins.size() << " labels for training. " << endl;
@@ -138,18 +139,15 @@ int main(int argc, char **argv)
     // Run the net on the new data.
     adagrad optimizer;
     int epoch = 0;
+
     net.fit<mse>(
         optimizer, boards, wins, args.batch_size, args.num_epochs, []() {}, [&]()
         { 
             std::cout << "Finished training epoch: " << epoch++; 
-            auto loss = net.get_loss<mse>(boards, wins); cout << " loss: " << loss << endl;
-        }
-    );
+            auto loss = net.get_loss<mse>(boards, wins); cout << " loss: " << loss << endl; });
 
     // Let's see if the network can predict the board any better now (should not be able to).
     // You need to provide a vector for prediction, not a single value.
     fprintf(stderr, "expected: %f, got: %f \n", wins[0][0], net.predict(boards[0])[0]);
-    // Alsp calculate and print the loss.
-    auto loss = net.get_loss<mse>(boards, wins);
     net.save(args.testnet);
 }

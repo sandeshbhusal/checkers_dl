@@ -822,6 +822,38 @@ void *mytimer(void *timeup)
     pthread_exit(NULL);
 }
 
+void horizontalFlip(vector<vector<float>> board)
+{
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            char temp = board[i][j];
+            board[i][j] = board[i][3 - j];
+            board[i][3 - j] = temp;
+        }
+    }
+}
+
+void verticalFlip(vector<vector<float>> board)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            char temp = board[j][i];
+            board[j][i] = board[7 - j][i];
+            board[7 - j][i] = temp;
+        }
+    }
+}
+
+void flip(vector<vector<float>> board)
+{
+    horizontalFlip(board);
+    verticalFlip(board);
+}
+
 int main(int argc, char *argv[])
 {
     srand((unsigned int)time(NULL));
@@ -910,20 +942,19 @@ int main(int argc, char *argv[])
             {
                 sprintf(str, "Draw %i.", numMoves);
                 Message(str);
-                fprintf(stderr, "Player %d has lost the game.", turn + 1);
-                // Also mark their dumpfile with LOSS or WIN.
+                // // Also mark their dumpfile with LOSS or WIN.
 
-                // Dump the board into a csv file.
-                FILE *fp = fopen("data.csv", "a+");
-                for (auto board : boards)
-                {
-                    fprintf(fp, "%f ", board[0]);
-                    for (int i = 1; i < 33; i++)
-                        fprintf(fp, "%f ", board[i]);
+                // // Dump the board into a csv file.
+                // FILE *fp = fopen("data.csv", "a+");
+                // for (auto board : boards)
+                // {
+                //     fprintf(fp, "%f ", board[0]);
+                //     for (int i = 1; i < 33; i++)
+                //         fprintf(fp, "%f ", board[i]);
 
-                    // Win/loss is the last line in the csv file.
-                    fprintf(fp, "0.0\n"); 
-                }
+                //     // Win/loss is the last line in the csv file.
+                //     fprintf(fp, "0.0\n");
+                // }
 
                 StopGame();
                 continue;
@@ -972,7 +1003,7 @@ int main(int argc, char *argv[])
                 else
                 {
                     if (!IsLegal(move, mlen))
-                    {   /* Illegal move check 2 */
+                    { /* Illegal move check 2 */
                         /*char temp[1000];
                         char *ptr1, *ptr2;
                         ptr1=text;
@@ -1015,14 +1046,53 @@ int main(int argc, char *argv[])
                             FILE *fp = fopen("data.csv", "a+");
                             for (auto board : boards)
                             {
-                                fprintf(fp, "%f ", board[0]);
+                                vector<float> playboard;
                                 for (int i = 1; i < 33; i++)
-                                    fprintf(fp, "%f ", board[i]);
+                                    playboard.push_back(board[i]);
+
+                                if (board[0] == 2) // If playing as p2, flip the board.
+                                {
+                                    // fprintf(stderr, "Flipping board for p2.\n");
+                                    // fprintf(stderr, "before: ");
+                                    // for (auto k : playboard)
+                                    //     cerr << k << ' ';
+                                    // cerr << endl;
+
+                                    // vertical flip - swap rows.
+                                    for (int y = 0; y < 4; y++)
+                                    {
+                                        for (int x = 0; x < 4; x++)
+                                        {
+                                            int piece = playboard[y * 4 + x];
+                                            playboard[y * 4 + x] = playboard[(7 - y) * 4 + x];
+                                            playboard[(7 - y) * 4 + x] = piece;
+                                        }
+                                    }
+                                    
+                                    // horizontal flip - swap columns.
+                                    for (int y = 0; y < 8; y++)
+                                    {
+                                        for (int x = 0; x < 2; x++)
+                                        {
+                                            int piece = playboard[y * 4 + x];
+                                            playboard[y * 4 + x] = playboard[y * 4 + (3 - x)];
+                                            playboard[y * 4 + (3 - x)] = piece;
+                                        }
+                                    }
+
+                                    // fprintf(stderr, "after : ");
+                                    // for (auto k : playboard)
+                                    //     cerr << k << ' ';
+                                    // cerr << endl;
+                                }
+
+                                for (int i = 0; i < 32; i++)
+                                    fprintf(fp, "%f ", playboard[i]);
 
                                 // Win/loss is the last line in the csv file.
                                 if (board[0] == (turn + 1))
                                 {
-                                    fprintf(fp, "-1.0\n");
+                                    fprintf(fp, "0.0\n");
                                 }
                                 else
                                 {
