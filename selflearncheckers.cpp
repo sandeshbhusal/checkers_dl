@@ -154,7 +154,6 @@ void DumpBoardForPlayer(int player)
         }
     }
 
-    cout << "Total cells: " << new_board.size() << endl;
     boards.push_back(new_board);
     // One more thing is remaining at this point; need to push the board "win/loss".
     fclose(fp);
@@ -922,7 +921,7 @@ int main(int argc, char *argv[])
                         fprintf(fp, "%f ", board[i]);
 
                     // Win/loss is the last line in the csv file.
-                    fprintf(fp, "0.0\n"); 
+                    fprintf(fp, "0.0\n");
                 }
 
                 StopGame();
@@ -972,7 +971,7 @@ int main(int argc, char *argv[])
                 else
                 {
                     if (!IsLegal(move, mlen))
-                    {   /* Illegal move check 2 */
+                    { /* Illegal move check 2 */
                         /*char temp[1000];
                         char *ptr1, *ptr2;
                         ptr1=text;
@@ -1008,29 +1007,33 @@ int main(int argc, char *argv[])
                         numlegal = FindLegalMoves(turn + 1);
                         if (!numlegal)
                         {
-                            fprintf(stderr, "Player %d has lost the game.", turn + 1);
-                            // Also mark their dumpfile with LOSS or WIN.
+                            // Previously, at this point, we were dumping the data to train the
+                            // neural net on. This time, we will train the neural net immediately
+                            // with the given data and start another game (with a bash script).
 
-                            // Dump the board into a csv file.
-                            FILE *fp = fopen("data.csv", "a+");
-                            for (auto board : boards)
+                            cerr << "Self learn checkers - self lost the game :) " << endl;
+                            cerr << "Updating the neural network params on gotten board states now... " << endl;
+                            StopGame();
+
+                            network<sequential> net;
+                            net.load("testnet");
+                            // Alternately fill a vec<float> with 1.0 and -1.0 depending on if p1 won or lost.
+                            vector<float> wins;
+                            float push = 0.0;
+                            if (turn == 0)
                             {
-                                fprintf(fp, "%f ", board[0]);
-                                for (int i = 1; i < 33; i++)
-                                    fprintf(fp, "%f ", board[i]);
-
-                                // Win/loss is the last line in the csv file.
-                                if (board[0] == (turn + 1))
-                                {
-                                    fprintf(fp, "-1.0\n");
-                                }
-                                else
-                                {
-                                    fprintf(fp, "1.0\n");
-                                }
+                                // p1 lost.
+                                push = -1.0;
+                            }
+                            else
+                                push = 1.0;
+                            for (int i = 0; i < boards.size(); i++)
+                            {
+                                wins.push_back(push);
+                                push *= -1;
                             }
 
-                            exit(0);
+                            // net.fit<crossentropy_loss> 
                         }
                         else if (player[turn] == COMPUTER)
                         {

@@ -15,8 +15,10 @@ computer: player.c
 	${CC} ${cppflags} ${cflags} player.c playerHelper.c -o computer
 nn: nn.cpp
 	${CC} ${CPPFLAGS} ${CFLAGS} nn.cpp -o trainer -lpthread -I.
-mlpplayer: mlpplayer.cpp
-	${CC} ${cppflags} ${cflags} mlpplayer.cpp playerHelper.c -o mlpplayer -I.
+
+# first and second players build.
+ai: mlpcts.cpp
+	${CC} ${cppflags} ${cflags} mlpcts.cpp -o ai -I.
 
 .PHONY: clean
 clean:	
