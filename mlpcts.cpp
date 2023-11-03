@@ -9,6 +9,7 @@
 #include <time.h>
 #include <float.h>
 #include <vector>
+#include <random>
 #include "myprog.h"
 #include "playerHelper.c"
 #include "defs.h"
@@ -166,15 +167,46 @@ void FindBestMove(int player, char board[8][8], char *bestmove)
     if (children.size() == 0)
         cerr << "lost the game!" << endl;
 
-    double bestEval = -10.0; // This cannot be reached by the NN - outputs should be in range of -1 to 1. 
+    double bestEval = -10.0; // This cannot be reached by the NN - outputs should be in range of -1 to 1.
+    
+    vector<float> action_values;
+    float total = 0.0;
     for (int i = 0; i < children.size(); i++) {
-        double eval = net.predict(generate_input_from_board(player, children[i]))[0]; 
-        if (eval > bestEval)
-        {
-            bestMoveIndex = i;
+        double eval = net.predict(generate_input_from_board(player, children[i]))[0];
+        // action_values.push_back(eval);
+        if (eval > bestEval) {
             bestEval = eval;
+            bestMoveIndex = i;
         }
     }
 
+    // for (auto k: action_values)
+    //     total += k;
+
+    // for (int i = 0; i < action_values.size(); i++)
+    //     action_values[i] /= total;
+
+    // std::sort(action_values.begin(), action_values.end());
+
+    // // roll a dice.
+    // std::random_device rng;
+    // std::mt19937 gen(rng());
+    // std::uniform_real_distribution<> dis(0.0, 1.0);
+    // double random_number = dis(gen);
+    // cerr << "Dice roll: " << random_number << endl;
+    // for (auto k : action_values)
+    //     cerr << k << " ";
+    // cerr << endl;
+
+    // int i = 0;
+    // while (i < action_values.size() && action_values[i] < random_number)
+    //     i++;
+
+    // bestMoveIndex = i - 1;
+    // if (bestMoveIndex == -1){
+    //     cerr << "Only can take piece" << endl;
+    //     bestMoveIndex = 0;
+    // }
+    // cerr << "selected " << bestMoveIndex << endl;
     safeCopy(bestmove, state.movelist[bestMoveIndex], MaxMoveLength, MoveLength(state.movelist[bestMoveIndex]));
 }
