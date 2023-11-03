@@ -139,23 +139,6 @@ public:
     }
 
 public:
-    int playout(struct State* state, int maxMoves) {
-        int myBestMoveIndex = 0;
-        if (state->numLegalMoves == 0){
-            return -1;
-        }
-        if (maxMoves == 0)
-            return 0;
-
-        myBestMoveIndex = rand() % state->numLegalMoves;
-
-        struct State nextstate;
-        memcpy(&nextstate, state, sizeof(struct State));
-        performMove(&nextstate, myBestMoveIndex);
-        return -playout(&nextstate, maxMoves - 1);
-    }
-
-public:
     void expand()
     {
         if (stop()) return;
@@ -172,7 +155,7 @@ public:
             Node *newNode = new Node(next, current);
 
             // Predict the neural net output here.
-            double temp = this->playout(this->state, 50);
+            double temp = net.predict(generate_input_from_board(this->state->player, next))[0];
             // End of prediction.
 
             if (temp > 0)

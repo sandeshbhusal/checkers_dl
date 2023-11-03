@@ -10,6 +10,12 @@
 #include <vector>
 #include <Xm/Xm.h>
 #include <pthread.h>
+#include "tiny_dnn/tiny_dnn.h"
+
+using namespace std;
+using namespace tiny_dnn;
+using namespace tiny_dnn::activation;
+using namespace tiny_dnn::layers;
 
 #include "myprog.h"
 #include "checkers.h"
@@ -53,7 +59,7 @@ int hlen = 0;
 int hmove[12];
 int HumanMoved = 0;
 
-vector<vector<float>> boards;
+vector<vec_t> boards;
 
 void Usage(char *str)
 {
@@ -105,7 +111,7 @@ void DumpBoardForPlayer(int player)
     }
 
     // Iterate over the board now and dump the numbers.
-    vector<float> new_board;
+    vec_t new_board;
     new_board.push_back(player + 1); // Player is either 0 or 1, so we add 1.
     int total_cells = 0;
 
@@ -812,7 +818,7 @@ void NewGame(void)
     }
 }
 
-void *timer(void *timeup)
+void *mytimer(void *timeup)
 {
     // usleep(1000 + SecPerMove * 1000);
     int sleeptime = 1 + SecPerMove;
@@ -877,7 +883,7 @@ int main(int argc, char *argv[])
             sprintf(str, "Waiting for player %d", turn + 1);
             Message(str);
             HumanMoved = done = 0;
-            pthread_create(&thread, NULL, timer, (void *)&done);
+            pthread_create(&thread, NULL, mytimer, (void *)&done);
             pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &dummy);
             do
             {
@@ -909,20 +915,47 @@ int main(int argc, char *argv[])
             {
                 sprintf(str, "Draw %i.", numMoves);
                 Message(str);
-                fprintf(stderr, "Player %d has lost the game.", turn + 1);
-                // Also mark their dumpfile with LOSS or WIN.
 
-                // Dump the board into a csv file.
-                FILE *fp = fopen("data.csv", "a+");
-                for (auto board : boards)
-                {
-                    fprintf(fp, "%f ", board[0]);
-                    for (int i = 1; i < 33; i++)
-                        fprintf(fp, "%f ", board[i]);
+                // Previously, at this point, we were dumping the data to train the
+                // neural net on. This time, we will train the neural net immediately
+                // with the given data and start another game (with a bash script).
 
-                    // Win/loss is the last line in the csv file.
-                    fprintf(fp, "0.0\n");
-                }
+                cerr << "Self learn checkers - the game was a draw!" << endl;
+                cerr << "The winner is whoever has the most pieces left at this point." << endl;
+
+                network<sequential> net;
+                net.load("testnet");
+                // Alternately fill a vec<float> with 1.0 and -1.0 depending on if p1 won or lost.
+                vector<vec_t> wins;
+                for (auto board: boards) {
+                    // Check who has more pieces.
+                    // Count -ve and +ve pieces count (add them up and abs);
+                    int neg = 0;
+                    int pos = 0;
+                    for (auto t: board)
+                        if (t < 0) neg += t;
+                        else pos += t;
+                    neg = abs(neg);
+                    pos = abs(pos);
+
+                    vec_t win;
+                    if (neg > pos) win.push_back(-0.5);
+                    else win.push_back(0.5);
+
+                    wins.push_back(win);
+                } 
+
+                cerr << "The game has ended. There are " << boards.size() << " boards and " << wins.size() << " labels" << endl;
+                adagrad optimizer;
+                int epoch = 0;
+                net.fit<mse>(
+                    optimizer, boards, wins, boards.size() / 4, 10, []() {}, [&]()
+                    {
+                                    std::cout << "Finished training epoch: " << epoch++; 
+                                    auto loss = net.get_loss<mse>(boards, wins); cout << " loss: " << loss << endl; });
+
+                cerr << "Finished training the net. Dumping it back for reuse... " << endl;
+                net.save("testnet");
 
                 StopGame();
                 continue;
@@ -1013,12 +1046,11 @@ int main(int argc, char *argv[])
 
                             cerr << "Self learn checkers - self lost the game :) " << endl;
                             cerr << "Updating the neural network params on gotten board states now... " << endl;
-                            StopGame();
 
                             network<sequential> net;
                             net.load("testnet");
                             // Alternately fill a vec<float> with 1.0 and -1.0 depending on if p1 won or lost.
-                            vector<float> wins;
+                            vector<vec_t> wins;
                             float push = 0.0;
                             if (turn == 0)
                             {
@@ -1029,11 +1061,25 @@ int main(int argc, char *argv[])
                                 push = 1.0;
                             for (int i = 0; i < boards.size(); i++)
                             {
-                                wins.push_back(push);
+                                vec_t win;
+                                win.push_back(push);
+                                wins.push_back(win);
                                 push *= -1;
                             }
 
-                            // net.fit<crossentropy_loss> 
+                            cerr << "The game has ended. There are " << boards.size() << " boards and " << wins.size() << " labels" << endl;
+                            adagrad optimizer;
+                            int epoch = 0;
+                            net.fit<mse>(
+                                optimizer, boards, wins, boards.size() / 4, 10, []() {}, [&]()
+                                {
+                                    std::cout << "Finished training epoch: " << epoch++; 
+                                    auto loss = net.get_loss<mse>(boards, wins); cout << " loss: " << loss << endl; });
+
+                            cerr << "Finished training the net. Dumping it back for reuse... " << endl;
+                            net.save("testnet");
+
+                            StopGame();
                         }
                         else if (player[turn] == COMPUTER)
                         {

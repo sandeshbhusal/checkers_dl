@@ -813,7 +813,7 @@ void NewGame(void)
     }
 }
 
-void *timer(void *timeup)
+void *mytimer(void *timeup)
 {
     // usleep(1000 + SecPerMove * 1000);
     int sleeptime = 1 + SecPerMove;
@@ -878,7 +878,7 @@ int main(int argc, char *argv[])
             sprintf(str, "Waiting for player %d", turn + 1);
             Message(str);
             HumanMoved = done = 0;
-            pthread_create(&thread, NULL, timer, (void *)&done);
+            pthread_create(&thread, NULL, mytimer, (void *)&done);
             pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &dummy);
             do
             {
