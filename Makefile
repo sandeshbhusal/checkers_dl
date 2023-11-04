@@ -27,7 +27,7 @@ nn: nn.cpp
 
 # MCTS agent with selfplay based on the neural network state-value prediction.
 ai: mlpcts.cpp
-	${CC} ${cppflags} ${cflags} mlpcts.cpp -o ai -I.
+	${CC} ${cppflags} ${cflags} mlpcts.cpp -o ai -I. -lpthread
 
 .PHONY: clean
 clean:	
